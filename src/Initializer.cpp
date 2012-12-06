@@ -15,7 +15,7 @@ Initializer::Initializer(const QString& libraryPath, const QString& tibiaPath, c
 
 void Initializer::run() {
 	Injector* injector = new PlatformInjector(libraryPath_);
-    injector->startAndAttach(tibiaPath_, QStringList(), workingDirectory_);
 
     connect(injector, SIGNAL(finished(int)), SIGNAL(finished()));
+    injector->startAndAttach(tibiaPath_, QStringList(), workingDirectory_);
 }

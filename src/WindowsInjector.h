@@ -16,6 +16,9 @@ public:
 	void attach(Q_PID processId);
 
 private slots:
+    void printStandardOutput();
+    void printStandardError();
+
 	void attachToSpawnedProcess();
 
 private:

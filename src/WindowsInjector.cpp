@@ -1,6 +1,6 @@
-#include "WindowsInjector.h"
-
 #include <QDebug>
+
+#include "WindowsInjector.h"
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -22,9 +22,11 @@ void WindowsInjector::startAndAttach(const QString& application, const QStringLi
 	attachTimer_->setSingleShot(true);
 	attachTimer_->setInterval(500);
 
-	connect(attachTimer_, SIGNAL(timeout()), this, SLOT(attachToSpawnedProcess()));
-	connect(process_, SIGNAL(started()), attachTimer_, SLOT(start()));
-	connect(process_, SIGNAL(finished(int, QProcess::ExitStatus)), SIGNAL(finished(int)));
+    QObject::connect(attachTimer_, SIGNAL(timeout()), this, SLOT(attachToSpawnedProcess()));
+    QObject::connect(process_, SIGNAL(readyReadStandardOutput()), this, SLOT(printStandardOutput()));
+    QObject::connect(process_, SIGNAL(readyReadStandardError()), this, SLOT(printStandardError()));
+    QObject::connect(process_, SIGNAL(started()), attachTimer_, SLOT(start()));
+    QObject::connect(process_, SIGNAL(finished(int, QProcess::ExitStatus)), SIGNAL(finished(int)));
 
     process_->setWorkingDirectory(workingDirectory);
     process_->start(application, arguments);
@@ -33,10 +35,18 @@ void WindowsInjector::startAndAttach(const QString& application, const QStringLi
 void WindowsInjector::attachToSpawnedProcess() {
 	if (process_->state() == QProcess::NotRunning) {
 		qDebug() << "Failed to start process:" << process_->error();
-	}
-	else {
-		attach(process_->pid());
-	}
+        return;
+    }
+
+    attach(process_->pid());
+}
+
+void WindowsInjector::printStandardOutput() {
+    qDebug() << process_->readAllStandardOutput();
+}
+
+void WindowsInjector::printStandardError() {
+    qWarning() << process_->readAllStandardError();
 }
 
 void WindowsInjector::attach(Q_PID processId) {

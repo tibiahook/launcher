@@ -42,9 +42,10 @@ int main(int argc, char** argv) {
         workingDirectory = QFileInfo(tibiaPath).canonicalPath();
     }
 
-    Initializer* initializer = new Initializer(libraryPath, tibiaPath, workingDirectory, &application);
-    QObject::connect(initializer, SIGNAL(finished()), &application, SLOT(quit()));
-    QTimer::singleShot(0, initializer, SLOT(run()));
+    Initializer initializer(libraryPath, tibiaPath, workingDirectory, &application);
+
+    QObject::connect(&initializer, SIGNAL(finished()), &application, SLOT(quit()));
+    QTimer::singleShot(0, &initializer, SLOT(run()));
 
 	return application.exec();
 }
