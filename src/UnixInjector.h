@@ -11,8 +11,8 @@ class UnixInjector: public Injector {
 public:
     UnixInjector(const QString& libraryPath, QObject* parent = 0);
 
-    void startAndAttach(const QString& application, const QStringList& arguments, const QString& workingDirectory = QString());
-    void attach(Q_PID processId) {};
+    bool startAndAttach(const QString& application, const QStringList& arguments, const QString& workingDirectory = QString());
+    bool attach(Q_PID processId) {}
 
 private:
     QProcess* process_;

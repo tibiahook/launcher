@@ -4,6 +4,9 @@
 #ifdef Q_OS_WIN
 #include "WindowsInjector.h"
 #define PlatformInjector WindowsInjector
+#else
+#include "UnixInjector.h"
+#define PlatformInjector UnixInjector
 #endif
 
 Initializer::Initializer(const QString& libraryPath, const QString& tibiaPath, const QString& workingDirectory, QObject* parent):

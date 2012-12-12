@@ -10,7 +10,7 @@ WindowsInjector::WindowsInjector(const QString& libraryPath, QObject* parent):
 	process_(NULL) {
 }
 
-void WindowsInjector::startAndAttach(const QString& application, const QStringList& arguments, const QString& workingDirectory) {
+bool WindowsInjector::startAndAttach(const QString& application, const QStringList& arguments, const QString& workingDirectory) {
 	// Clean up old process first
 	if (process_ != NULL) {
 		delete process_;
@@ -30,6 +30,8 @@ void WindowsInjector::startAndAttach(const QString& application, const QStringLi
 
     process_->setWorkingDirectory(workingDirectory);
     process_->start(application, arguments);
+
+    return true;
 }
 
 void WindowsInjector::attachToSpawnedProcess() {
@@ -41,23 +43,33 @@ void WindowsInjector::attachToSpawnedProcess() {
     attach(process_->pid());
 }
 
-void WindowsInjector::printStandardOutput() {
-    qDebug() << process_->readAllStandardOutput();
-}
-
-void WindowsInjector::printStandardError() {
-    qWarning() << process_->readAllStandardError();
-}
-
-void WindowsInjector::attach(Q_PID processId) {
+bool WindowsInjector::attach(Q_PID processId) {
 	wchar_t path[_MAX_PATH];
 	const int pathLength = libraryPath().toWCharArray(path);
 	path[pathLength] = 0;
 
     HMODULE library = ::LoadLibraryW(path);
+    if (library == NULL) {
+        qDebug() << "Failed to load library: " << libraryPath();
+        return false;
+    }
     FARPROC hook = ::GetProcAddress(library, "hook_constructor");
+    if (hook == NULL) {
+        qDebug() << "Failed to load hook_constructor in library";
+        return false;
+    }
 
 	typedef void(*Installer)(HINSTANCE, DWORD);
 	Installer installer = reinterpret_cast<Installer>(hook);
 	(*installer)(library, processId->dwThreadId);
+
+    return true;
+}
+
+void WindowsInjector::printStandardOutput() {
+    qDebug("%s", process_->readAllStandardOutput().data());
+}
+
+void WindowsInjector::printStandardError() {
+    qCritical("%s", process_->readAllStandardError().data());
 }

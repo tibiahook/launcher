@@ -5,6 +5,10 @@ TEMPLATE = app
 CONFIG += console
 
 DESTDIR = bin
+OBJECTS_DIR = $${DESTDIR}/.obj
+MOC_DIR = $${DESTDIR}/.moc
+RCC_DIR = $${DESTDIR}/.rcc
+UI_DIR = $${DESTDIR}/.ui
 
 SOURCES += \
     src/Main.cpp \
