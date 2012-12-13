@@ -6,21 +6,21 @@
 #include <windows.h>
 
 WindowsInjector::WindowsInjector(const QString& libraryPath, QObject* parent):
-	Injector(libraryPath, parent),
-	process_(NULL) {
+    Injector(libraryPath, parent),
+    process_(NULL) {
 }
 
 bool WindowsInjector::startAndAttach(const QString& application, const QStringList& arguments, const QString& workingDirectory) {
-	// Clean up old process first
-	if (process_ != NULL) {
-		delete process_;
-	}
+    // Clean up old process first
+    if (process_ != NULL) {
+        delete process_;
+    }
 
     process_ = new QProcess(this);
 
-	attachTimer_ = new QTimer(this);
-	attachTimer_->setSingleShot(true);
-	attachTimer_->setInterval(500);
+    attachTimer_ = new QTimer(this);
+    attachTimer_->setSingleShot(true);
+    attachTimer_->setInterval(500);
 
     QObject::connect(attachTimer_, SIGNAL(timeout()), this, SLOT(attachToSpawnedProcess()));
     QObject::connect(process_, SIGNAL(readyReadStandardOutput()), this, SLOT(printStandardOutput()));
@@ -35,8 +35,8 @@ bool WindowsInjector::startAndAttach(const QString& application, const QStringLi
 }
 
 void WindowsInjector::attachToSpawnedProcess() {
-	if (process_->state() == QProcess::NotRunning) {
-		qDebug() << "Failed to start process:" << process_->error();
+    if (process_->state() == QProcess::NotRunning) {
+        qDebug() << "Failed to start process:" << process_->error();
         return;
     }
 
@@ -44,9 +44,9 @@ void WindowsInjector::attachToSpawnedProcess() {
 }
 
 bool WindowsInjector::attach(Q_PID processId) {
-	wchar_t path[_MAX_PATH];
-	const int pathLength = libraryPath().toWCharArray(path);
-	path[pathLength] = 0;
+    wchar_t path[_MAX_PATH];
+    const int pathLength = libraryPath().toWCharArray(path);
+    path[pathLength] = 0;
 
     HMODULE library = ::LoadLibraryW(path);
     if (library == NULL) {
@@ -59,9 +59,9 @@ bool WindowsInjector::attach(Q_PID processId) {
         return false;
     }
 
-	typedef void(*Installer)(HINSTANCE, DWORD);
-	Installer installer = reinterpret_cast<Installer>(hook);
-	(*installer)(library, processId->dwThreadId);
+    typedef void(*Installer)(HINSTANCE, DWORD);
+    Installer installer = reinterpret_cast<Installer>(hook);
+    (*installer)(library, processId->dwThreadId);
 
     return true;
 }

@@ -7,22 +7,22 @@
 #include <QTextStream>
 
 class Initializer: public QObject {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
     Initializer(const QString& libraryPath, const QString& tibiaPath, const QString& workingDirectory, QObject* parent = 0);
 
-	virtual ~Initializer() {}
+    virtual ~Initializer() {}
 
 public slots:
-	void run();
+    void run();
 
 signals:
-	void finished();
+    void finished();
 
 private:
-	QString libraryPath_;
-	QString tibiaPath_;
+    QString libraryPath_;
+    QString tibiaPath_;
     QString workingDirectory_;
 };
 

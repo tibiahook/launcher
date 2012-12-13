@@ -8,14 +8,14 @@
 #include "Initializer.h"
 
 int main(int argc, char** argv) {
-	QCoreApplication application(argc, argv);
+    QCoreApplication application(argc, argv);
 
     QStringList arguments = QCoreApplication::arguments();
 
-	if (arguments.length() < 3) {
+    if (arguments.length() < 3) {
         qDebug() << "usage: tibia-hook-injector --library <library-path> --tibia <executable> --directory <working-dir>";
-		return 1;
-	}
+        return 1;
+    }
 
     QString libraryPath;
     QString tibiaPath;
@@ -47,5 +47,5 @@ int main(int argc, char** argv) {
     QObject::connect(&initializer, SIGNAL(finished()), &application, SLOT(quit()));
     QTimer::singleShot(0, &initializer, SLOT(run()));
 
-	return application.exec();
+    return application.exec();
 }
