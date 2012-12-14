@@ -12,7 +12,6 @@ public:
     UnixInjector(const QString& libraryPath, QObject* parent = 0);
 
     bool startAndAttach(const QString& application, const QStringList& arguments, const QString& workingDirectory = QString());
-    bool attach(Q_PID processId) {}
 
 private:
     QProcess* process_;

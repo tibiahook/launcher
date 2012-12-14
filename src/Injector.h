@@ -15,7 +15,6 @@ public:
     virtual ~Injector() {}
 
     virtual bool startAndAttach(const QString& application, const QStringList& arguments, const QString& workingDirectory = QString()) = 0;
-    virtual bool attach(Q_PID processId) = 0;
 
     const QString& libraryPath() const { return libraryPath_; }
 

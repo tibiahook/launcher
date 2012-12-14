@@ -1,17 +1,15 @@
-include(../libraries.pri)
-
 QT += core
 QT -= gui
 
 TEMPLATE = app
 CONFIG += console
 
-TARGET = tibia-injector
+TARGET = tibia-launcher
 
+include(../libraries.pri)
 LIBS += \
     -L$${LIB_QT_JSON_BIN_DIR} \
     -l$${LIB_QT_JSON_BIN_NAME}
-
 INCLUDEPATH += $${LIB_QT_JSON_SRC_DIR}
 
 SOURCES += \
