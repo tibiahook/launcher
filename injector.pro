@@ -1,14 +1,18 @@
+include(../libraries.pri)
+
 QT += core
 QT -= gui
 
 TEMPLATE = app
 CONFIG += console
 
-DESTDIR = bin
-OBJECTS_DIR = $${DESTDIR}/.obj
-MOC_DIR = $${DESTDIR}/.moc
-RCC_DIR = $${DESTDIR}/.rcc
-UI_DIR = $${DESTDIR}/.ui
+TARGET = tibia-injector
+
+LIBS += \
+    -L$${LIB_QT_JSON_BIN_DIR} \
+    -l$${LIB_QT_JSON_BIN_NAME}
+
+INCLUDEPATH += $${LIB_QT_JSON_SRC_DIR}
 
 SOURCES += \
     src/Main.cpp \
@@ -26,3 +30,5 @@ win32 {
     HEADERS += src/WindowsInjector.h
     SOURCES += src/WindowsInjector.cpp
 }
+
+include(../shared.pri)

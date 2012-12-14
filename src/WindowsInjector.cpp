@@ -1,4 +1,10 @@
 #include <QDebug>
+#include <QDir>
+#include <QFileInfo>
+#include <QMutableListIterator>
+#include <QVariant>
+
+#include <json.h>
 
 #include "WindowsInjector.h"
 
@@ -43,22 +49,83 @@ void WindowsInjector::attachToSpawnedProcess() {
     attach(process_->pid());
 }
 
+bool WindowsInjector::copyAdjustedPluginSettings(const QString& source, const QString& destination) {
+    QFile sourceFile(source);
+    if (!sourceFile.open(QFile::ReadOnly)) {
+        qDebug() << "Could not open config file!";
+        return false;
+    }
+
+    bool parsed = false;
+    QVariant settings = QtJson::parse(sourceFile.readAll(), parsed);
+    if (!parsed || settings.type() != QVariant::Map) {
+        qDebug() << "Invalid config file!";
+        return false;
+    }
+
+    QVariant pluginsResult = settings.toMap().value("plugins");
+    if (pluginsResult.type() != QVariant::List) {
+        qDebug() << "Invalid plugins list!";
+        return false;
+    }
+
+    QVariantList plugins = pluginsResult.toList();
+    QDir sourceDirectory(QFileInfo(source).absoluteDir());
+
+    QMutableListIterator<QVariant> iterator(plugins);
+    while (iterator.hasNext()) {
+        QVariant& plugin = iterator.next();
+        if (plugin.type() != QVariant::String) {
+            qDebug() << "Invalid plugin " << plugin << "!";
+            return false;
+        }
+        QString pluginPath(plugin.toString());
+        if (!QFileInfo(pluginPath).isAbsolute()) {
+            QString pluginAbsolutePath = QDir::cleanPath(sourceDirectory.absoluteFilePath(pluginPath));
+            iterator.setValue(pluginAbsolutePath);
+        }
+    }
+
+    // Create new settings file
+    QVariantMap newSettings = settings.toMap();
+    newSettings["plugins"] = plugins;
+
+    // Create new config file
+    QFile destinationFile(destination);
+    if (!destinationFile.open(QFile::WriteOnly | QFile::Truncate)) {
+        qDebug() << "Could create destination config file!";
+        return false;
+    }
+
+    destinationFile.write(QtJson::serialize(newSettings));
+    destinationFile.close();
+
+    return true;
+}
+
 bool WindowsInjector::attach(Q_PID processId) {
     wchar_t path[_MAX_PATH];
     const int pathLength = libraryPath().toWCharArray(path);
     path[pathLength] = 0;
 
-    HMODULE library = ::LoadLibraryW(path);
+    HMODULE library = LoadLibraryW(path);
     if (library == NULL) {
-        qDebug() << "Failed to load library: " << libraryPath();
-        return false;
-    }
-    FARPROC hook = ::GetProcAddress(library, "hook_constructor");
-    if (hook == NULL) {
-        qDebug() << "Failed to load hook_constructor in library";
+        qDebug() << "Failed to load library: " << libraryPath() << "!";
         return false;
     }
 
+    FARPROC hook = GetProcAddress(library, "hook_constructor");
+    if (hook == NULL) {
+        qDebug() << "Failed to load hook_constructor in library!";
+        return false;
+    }
+
+    // Copy config.js file to the Tibia directory
+    QDir configDirectory(QFileInfo(libraryPath()).absoluteDir());
+    QDir workingDirectory = process_->workingDirectory();
+    copyAdjustedPluginSettings(configDirectory.absoluteFilePath("config.js"), workingDirectory.absoluteFilePath("config.js"));
+
+    // Construct the injected library
     typedef void(*Installer)(HINSTANCE, DWORD);
     Installer installer = reinterpret_cast<Installer>(hook);
     (*installer)(library, processId->dwThreadId);

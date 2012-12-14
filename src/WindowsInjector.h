@@ -22,6 +22,8 @@ private slots:
     void attachToSpawnedProcess();
 
 private:
+    bool copyAdjustedPluginSettings(const QString &source, const QString &destination);
+
     QProcess* process_;
     QTimer* attachTimer_;
 };
