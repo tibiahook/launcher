@@ -123,7 +123,7 @@ bool WindowsInjector::attach(Q_PID processId) {
     // Copy config.js file to the Tibia directory
     QDir configDirectory(QFileInfo(libraryPath()).absoluteDir());
     QDir workingDirectory = process_->workingDirectory();
-    copyAdjustedPluginSettings(configDirectory.absoluteFilePath("config.js"), workingDirectory.absoluteFilePath("config.js"));
+    copyAdjustedPluginSettings(configDirectory.absoluteFilePath("config.json"), workingDirectory.absoluteFilePath("config.json"));
 
     // Construct the injected library
     typedef void(*Installer)(HINSTANCE, DWORD);
