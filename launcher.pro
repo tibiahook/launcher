@@ -6,12 +6,6 @@ CONFIG += console
 
 TARGET = tibia-launcher
 
-include(../libraries.pri)
-LIBS += \
-    -L$${LIB_QT_JSON_BIN_DIR} \
-    -l$${LIB_QT_JSON_BIN_NAME}
-INCLUDEPATH += $${LIB_QT_JSON_SRC_DIR}
-
 SOURCES += \
     src/Main.cpp \
     src/Initializer.cpp
@@ -29,4 +23,5 @@ win32 {
     SOURCES += src/WindowsInjector.cpp
 }
 
+include(../qt-json/qt-json.pri)
 include(../shared.pri)

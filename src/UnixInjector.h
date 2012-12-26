@@ -13,7 +13,13 @@ public:
 
     bool startAndAttach(const QString& application, const QStringList& arguments, const QString& workingDirectory = QString());
 
+private slots:
+    void printStandardOutput();
+    void printStandardError();
+
 private:
+    bool copyAdjustedPluginSettings(const QString& source, const QString& destination);
+
     QProcess* process_;
 };
 
