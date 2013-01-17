@@ -2,28 +2,29 @@
 #define INITIALIZER_H
 
 #include <QObject>
+#include <QProcess>
 #include <QString>
-#include <QStringList>
-#include <QTextStream>
+
+class Injector;
 
 class Initializer: public QObject {
     Q_OBJECT
 
 public:
-    Initializer(const QString& libraryPath, const QString& tibiaPath, const QString& workingDirectory, QObject* parent = 0);
-
-    virtual ~Initializer() {}
+    Initializer(const QString& libraryPath, const QString& tibiaPath, QObject* parent = 0);
+    ~Initializer();
 
 public slots:
-    void run();
+    void start();
 
 signals:
-    void finished();
+    void finished(int exitCode, QProcess::ExitStatus exitStatus);
 
 private:
     QString libraryPath_;
     QString tibiaPath_;
-    QString workingDirectory_;
+
+    Injector* injector_;
 };
 
 #endif

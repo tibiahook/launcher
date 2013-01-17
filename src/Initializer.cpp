@@ -1,24 +1,20 @@
 #include "Initializer.h"
 #include "Injector.h"
 
-#ifdef Q_OS_WIN
-#include "WindowsInjector.h"
-#define PlatformInjector WindowsInjector
-#else
-#include "UnixInjector.h"
-#define PlatformInjector UnixInjector
-#endif
-
-Initializer::Initializer(const QString& libraryPath, const QString& tibiaPath, const QString& workingDirectory, QObject* parent):
+Initializer::Initializer(const QString& libraryPath, const QString& tibiaPath, QObject* parent):
     QObject(parent),
     libraryPath_(libraryPath),
     tibiaPath_(tibiaPath),
-    workingDirectory_(workingDirectory) {
+    injector_(new Injector(libraryPath_, this)) {
+
+    // Connect signal to signal
+    QObject::connect(injector_, &Injector::finished, this, &Initializer::finished);
 }
 
-void Initializer::run() {
-    Injector* injector = new PlatformInjector(libraryPath_);
+Initializer::~Initializer() {
+    delete injector_;
+}
 
-    connect(injector, SIGNAL(finished(int)), SIGNAL(finished()));
-    injector->startAndAttach(tibiaPath_, QStringList(), workingDirectory_);
+void Initializer::start() {
+    injector_->startAndAttach(tibiaPath_, QStringList());
 }

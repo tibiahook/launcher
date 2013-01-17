@@ -3,26 +3,33 @@
 
 #include <QObject>
 #include <QProcess>
+#include <QString>
 
 class Injector: public QObject {
     Q_OBJECT
 
 public:
-    Injector(const QString& libraryPath, QObject* parent = 0):
+    Injector(const QString& libraryPath, QObject* parent):
         QObject(parent),
-        libraryPath_(libraryPath) {}
+        libraryPath_(libraryPath),
+        process_(NULL) {}
 
-    virtual ~Injector() {}
-
-    virtual bool startAndAttach(const QString& application, const QStringList& arguments, const QString& workingDirectory = QString()) = 0;
-
-    const QString& libraryPath() const { return libraryPath_; }
+    bool startAndAttach(const QString& application, const QStringList& arguments);
 
 signals:
-    void finished(int exitCode);
+    void finished(int exitCode, QProcess::ExitStatus exitStatus);
 
-protected:
+private slots:
+    void printStandardOutput();
+    void printStandardError();
+
+    void attachToSpawnedProcess();
+
+private:
+    bool rewriteConfig(const QString& source, const QString& destination);
+
     QString libraryPath_;
+    QProcess* process_;
 };
 
 #endif
